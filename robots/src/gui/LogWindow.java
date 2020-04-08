@@ -47,4 +47,8 @@ public class LogWindow extends JInternalFrame implements LogChangeListener
     {
         EventQueue.invokeLater(this::updateLogContent);
     }
+
+	public FrameInfo getInfo() {
+		return new FrameInfo(getWidth(), getHeight(), getLocation(), isMaximum(), isIcon());
+	}
 }

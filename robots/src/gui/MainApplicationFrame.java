@@ -36,14 +36,6 @@ import com.google.gson.JsonSyntaxException;
 
 import log.Logger;
 
-
-
-/**
- * Что требуется сделать:
- * 1. Метод создания меню перегружен функционалом и трудно читается. 
- * Следует разделить его на серию более простых методов (или вообще выделить отдельный класс).
- *
- */
 public class MainApplicationFrame extends JFrame
 {
     private final JDesktopPane desktopPane = new JDesktopPane();
@@ -52,56 +44,57 @@ public class MainApplicationFrame extends JFrame
     public MainApplicationFrame() {
         //Make the big window be indented 50 pixels from each edge
         //of the screen.
-    	if (new File("info.json").exists())
-    	{
-    		Gson gson = new GsonBuilder().create();
-    		try {
-				info = gson.fromJson(new FileReader("info.json"), Info.class);
-			} catch (JsonSyntaxException e) {
-				System.out.print("Can't read json(syntax)");
-				e.printStackTrace();
-			} catch (JsonIOException e) {
-				System.out.print("Can't read json(fileException)");
-				e.printStackTrace();
-			} catch (FileNotFoundException e) {
-				System.out.print("Can't read json(file not found)");
-				e.printStackTrace();
-			}
-    	}
-	        int inset = 50; 
-	        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-	        setBounds(inset, inset,
-	            screenSize.width  - inset*2,
-	            screenSize.height - inset*2);
-	        setContentPane(desktopPane);
+	    int inset = 50; 
+	    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+	    setBounds(inset, inset,
+	        screenSize.width  - inset*2,
+	        screenSize.height - inset*2);
+	    setContentPane(desktopPane);
 	        
-	        LogWindow logWindow = createLogWindow();
-	        addWindow(logWindow);
+	    if (new File("info.json").exists()) readJSON();
+	        
+	    LogWindow logWindow = createLogWindow();
+	    addWindow(logWindow);
 	
-	        GameWindow gameWindow = new GameWindow();
-	        if (info != null)
-	        {
-	        	gameWindow.setLocation(info.Internal2Frame.Location);
-	        	gameWindow.setSize(info.Internal2Frame.Width, info.Internal2Frame.Height);
-	        }
-	        else
-	        	gameWindow.setSize(400,  400);
-	        addWindow(gameWindow);
+	    GameWindow gameWindow = new GameWindow();
+	    if (info != null)
+	    {
+	        gameWindow.setLocation(info.getFrame2().location());
+	        gameWindow.setSize(info.getFrame2().width(), info.getFrame2().height());
+	    }
+	    else
+	        gameWindow.setSize(400,  400);
+	    addWindow(gameWindow);
 	
-	        setJMenuBar(generateMenuBar());
-	        setDefaultCloseOperation(EXIT_ON_CLOSE);		
+	    setJMenuBar(generateMenuBar());
+	    setDefaultCloseOperation(EXIT_ON_CLOSE);		
     }
     
-    protected LogWindow createLogWindow()
+    private void readJSON() {
+    	Gson gson = new GsonBuilder().create();
+		try {
+			info = gson.fromJson(new FileReader("info.json"), Info.class);
+		} catch (JsonSyntaxException e) {
+			System.out.print("Can't read json(syntax)");
+			e.printStackTrace();
+		} catch (JsonIOException e) {
+			System.out.print("Can't read json(fileException)");
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			System.out.print("Can't read json(file not found)");
+			e.printStackTrace();
+		}
+	}
+
+	protected LogWindow createLogWindow()
     {
     	LogWindow logWindow = new LogWindow(Logger.getDefaultLogSource());
     	if (info != null)
     	{
-    		logWindow.setLocation(info.Internal1Frame.Location);
-            logWindow.setSize(info.Internal1Frame.Width, info.Internal1Frame.Height);
-            if(info.Internal1Frame.IsMin)
+    		logWindow.setLocation(info.getFrame1().location());
+            logWindow.setSize(info.getFrame1().width(), info.getFrame1().height());
+            if(info.getFrame1().isMin())
                     try {
-                    	//Вроде бы этот метод сворачивает окно, но на деле ничего не проиходит
 						logWindow.setIcon(true);
 					} catch (PropertyVetoException e) {
 						e.printStackTrace();
@@ -188,14 +181,14 @@ public class MainApplicationFrame extends JFrame
                 		   JOptionPane.INFORMATION_MESSAGE, 
                 		   null, 
                 		   new Object[]{"Да", "Нет"}, 
-                		   "Да");//то, что выделяется системой                   
+                		   "Да");                   
                 if (result == JOptionPane.YES_OPTION)
                 	saveAndExit();
                 }}
  	
         );
         return closeMenu;
-}
+    }
 
 	private JMenuItem getLogMessageItem() {
     	JMenuItem logMessageItem = new JMenuItem("Сообщение в лог", KeyEvent.VK_S);
@@ -203,7 +196,7 @@ public class MainApplicationFrame extends JFrame
             Logger.debug("Новая строка");
         });
         return logMessageItem;
-}
+    }
 
 	private JMenuItem getCrossplatformLookAndFeel() {
     	JMenuItem crossplatformLookAndFeel = new JMenuItem("Универсальная схема", KeyEvent.VK_S);
@@ -212,7 +205,7 @@ public class MainApplicationFrame extends JFrame
             this.invalidate();
         });
         return crossplatformLookAndFeel;
-}
+	}
 
 	private JMenuItem getSystemLookAndFeel() {
     	JMenuItem systemLookAndFeel = new JMenuItem("Системная схема", KeyEvent.VK_S);
@@ -221,20 +214,19 @@ public class MainApplicationFrame extends JFrame
             this.invalidate();
         });
         return systemLookAndFeel;
-}
+	}
 
 	private void saveAndExit()
     {
     	JInternalFrame[] panes = desktopPane.getAllFrames();
-    	//Упорядочивание окон в desktopPane
     	if (!(desktopPane.getAllFrames()[0] instanceof LogWindow))
     	{
     		panes[0] = desktopPane.getAllFrames()[1];
     		panes[1] = desktopPane.getAllFrames()[0];
     	} 
-    	FrameInfo frame1 = new FrameInfo(panes[0].getWidth(), panes[0].getHeight(), panes[0].getLocation(), panes[0].isMaximum(), panes[0].isIcon());
-    	FrameInfo frame2 = new FrameInfo(panes[1].getWidth(), panes[1].getHeight(), panes[1].getLocation(), panes[1].isMaximum(), panes[1].isIcon());
-    	Info info = new Info(frame1, frame2);
+    	FrameInfo logWindowInfo = ((LogWindow)panes[0]).getInfo(); 
+    	FrameInfo gameWindowInfo = ((GameWindow)panes[1]).getInfo(); 
+    	Info info = new Info(logWindowInfo, gameWindowInfo);
     	Gson gson = new GsonBuilder().create();
     	FileWriter outStream;
     	try {

@@ -17,4 +17,7 @@ public class GameWindow extends JInternalFrame
         getContentPane().add(panel);
         pack();
     }
+	public FrameInfo getInfo() {
+		return new FrameInfo(getWidth(), getHeight(), getLocation(), isMaximum(), isIcon());
+	}
 }
