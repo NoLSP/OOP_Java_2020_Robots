@@ -65,7 +65,17 @@ public class MainApplicationFrame extends JFrame
 	    else
 	        gameWindow.setSize(400,  400);
 	    addWindow(gameWindow);
-	
+	    if (info != null)
+	    {
+	        if(info.getFrame1().isMin())
+				desktopPane.getDesktopManager().iconifyFrame(logWindow);
+	        if(info.getFrame1().isMax())
+				desktopPane.getDesktopManager().maximizeFrame(logWindow);
+	        if(info.getFrame2().isMin())
+				desktopPane.getDesktopManager().iconifyFrame(gameWindow);
+	        if(info.getFrame2().isMax())
+				desktopPane.getDesktopManager().maximizeFrame(gameWindow);
+	    }
 	    setJMenuBar(generateMenuBar());
 	    setDefaultCloseOperation(EXIT_ON_CLOSE);		
     }
@@ -93,19 +103,14 @@ public class MainApplicationFrame extends JFrame
     	{
     		logWindow.setLocation(info.getFrame1().location());
             logWindow.setSize(info.getFrame1().width(), info.getFrame1().height());
-            if(info.getFrame1().isMin())
-                    try {
-						logWindow.setIcon(true);
-					} catch (PropertyVetoException e) {
-						e.printStackTrace();
-					}
+            
     	}
     	else {
         logWindow.setLocation(10,10);
         logWindow.setSize(300, 800);
         setMinimumSize(logWindow.getSize());
     	}
-    	logWindow.pack();
+    	//logWindow.pack();
         Logger.debug("Протокол работает");
         return logWindow;
     }
