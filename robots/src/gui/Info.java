@@ -1,22 +1,29 @@
 package gui;
 
 public class Info {
-	private FrameInfo internal1Frame;
-	private FrameInfo internal2Frame;
+	private FrameInfo logFrame;
+	private FrameInfo gameFrame;
+	private FrameInfo posFrame;
 	
-	public Info(FrameInfo internal1Frame, FrameInfo internal2Frame)
+	public Info(FrameInfo logFrame, FrameInfo gameFrame, FrameInfo posFrame)
 	{
-		this.internal1Frame = internal1Frame;
-		this.internal2Frame = internal2Frame;
+		this.logFrame = logFrame;
+		this.gameFrame = gameFrame;
+		this.posFrame = posFrame;
 	}
 	
-	public FrameInfo getFrame1()
+	public FrameInfo getLogFrame()
 	{
-		return internal1Frame;
+		return logFrame;
 	}
 	
-	public FrameInfo getFrame2()
+	public FrameInfo getGameFrame()
 	{
-		return internal2Frame;
+		return gameFrame;
+	}
+	
+	public FrameInfo getPosFrame()
+	{
+		return posFrame;
 	}
 }

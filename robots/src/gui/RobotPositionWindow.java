@@ -5,17 +5,17 @@ import java.awt.BorderLayout;
 import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
 
-public class GameWindow extends JInternalFrame
+public class RobotPositionWindow extends JInternalFrame
 {
-    private final GameVisualizer m_visualizer;
+    private final PositionVisualizer visualizer;
     
-    public GameWindow() 
+    public RobotPositionWindow() 
     {
-        super("Игровое поле", true, true, true, true);
-        m_visualizer = new GameVisualizer();
+        super("Позиция робота", true, true, true, true);
+        visualizer = new PositionVisualizer();
         
         JPanel panel = new JPanel(new BorderLayout());
-        panel.add(m_visualizer, BorderLayout.CENTER);
+        panel.add(visualizer, BorderLayout.CENTER);
         getContentPane().add(panel);
         pack();
     }
@@ -24,7 +24,7 @@ public class GameWindow extends JInternalFrame
 		return new FrameInfo(getWidth(), getHeight(), getLocation(), isMaximum(), isIcon());
 	}
 
-	public GameVisualizer getVisualizer() {
-		return m_visualizer;
+	public PositionVisualizer getVisualizer() {
+		return visualizer;
 	}
 }

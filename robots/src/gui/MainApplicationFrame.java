@@ -39,6 +39,8 @@ import log.Logger;
 public class MainApplicationFrame extends JFrame
 {
     private final JDesktopPane desktopPane = new JDesktopPane();
+    private final RobotModel robotModel;
+    private final RobotController robotController;
     private Info info = null;
     
     public MainApplicationFrame() {
@@ -59,25 +61,35 @@ public class MainApplicationFrame extends JFrame
 	    GameWindow gameWindow = new GameWindow();
 	    if (info != null)
 	    {
-	        gameWindow.setLocation(info.getFrame2().location());
-	        gameWindow.setSize(info.getFrame2().width(), info.getFrame2().height());
+	        gameWindow.setLocation(info.getGameFrame().location());
+	        gameWindow.setSize(info.getGameFrame().width(), info.getGameFrame().height());
 	    }
 	    else
 	        gameWindow.setSize(400,  400);
 	    addWindow(gameWindow);
+	    
+	    RobotPositionWindow posWindow = createPosWindow();
+	    addWindow(posWindow);
+	    
 	    if (info != null)
 	    {
-	        if(info.getFrame1().isMin())
-				desktopPane.getDesktopManager().iconifyFrame(logWindow);
-	        if(info.getFrame1().isMax())
-				desktopPane.getDesktopManager().maximizeFrame(logWindow);
-	        if(info.getFrame2().isMin())
-				desktopPane.getDesktopManager().iconifyFrame(gameWindow);
-	        if(info.getFrame2().isMax())
-				desktopPane.getDesktopManager().maximizeFrame(gameWindow);
+	        if(info.getLogFrame().isMin())
+				logWindow.setSize(100, 100);
+	        //if(info.getFrame1().isMax())
+				//desktopPane.getDesktopManager().maximizeFrame(logWindow);
+	        if(info.getGameFrame().isMin())
+				gameWindow.setSize(100, 100);
+	        //if(info.getFrame2().isMax())
+				//desktopPane.getDesktopManager().maximizeFrame(gameWindow);
+	        if(info.getPosFrame().isMin())
+	        	posWindow.setSize(100, 100);
 	    }
 	    setJMenuBar(generateMenuBar());
-	    setDefaultCloseOperation(EXIT_ON_CLOSE);		
+	    setDefaultCloseOperation(EXIT_ON_CLOSE);
+	    
+	    robotModel = new RobotModel(gameWindow.getVisualizer(), posWindow.getVisualizer());
+	    robotController = new RobotController(robotModel);
+	    gameWindow.getVisualizer().setController(robotController);
     }
     
     private void readJSON() {
@@ -95,14 +107,32 @@ public class MainApplicationFrame extends JFrame
 			e.printStackTrace();
 		}
 	}
+    
+    protected RobotPositionWindow createPosWindow()
+    {
+    	RobotPositionWindow posWindow = new RobotPositionWindow();
+    	if (info != null)
+    	{
+    		posWindow.setLocation(info.getPosFrame().location());
+            posWindow.setSize(info.getPosFrame().width(), info.getPosFrame().height());
+            
+    	}
+    	else
+    	{
+	    	posWindow.setLocation(300,10);
+			posWindow.setSize(300, 200);
+			setMinimumSize(posWindow.getSize());
+    	}
+        return posWindow;
+    }
 
 	protected LogWindow createLogWindow()
     {
     	LogWindow logWindow = new LogWindow(Logger.getDefaultLogSource());
     	if (info != null)
     	{
-    		logWindow.setLocation(info.getFrame1().location());
-            logWindow.setSize(info.getFrame1().width(), info.getFrame1().height());
+    		logWindow.setLocation(info.getLogFrame().location());
+            logWindow.setSize(info.getLogFrame().width(), info.getLogFrame().height());
             
     	}
     	else {
@@ -223,15 +253,17 @@ public class MainApplicationFrame extends JFrame
 
 	private void saveAndExit()
     {
-    	JInternalFrame[] panes = desktopPane.getAllFrames();
-    	if (!(desktopPane.getAllFrames()[0] instanceof LogWindow))
+    	JInternalFrame[] panes = new JInternalFrame[3];
+    	for(JInternalFrame frame : desktopPane.getAllFrames())
     	{
-    		panes[0] = desktopPane.getAllFrames()[1];
-    		panes[1] = desktopPane.getAllFrames()[0];
+    		if (frame instanceof LogWindow) panes[0] = frame;
+    		if (frame instanceof GameWindow) panes[1] = frame;
+    		if (frame instanceof RobotPositionWindow) panes[2] = frame;
     	} 
     	FrameInfo logWindowInfo = ((LogWindow)panes[0]).getInfo(); 
     	FrameInfo gameWindowInfo = ((GameWindow)panes[1]).getInfo(); 
-    	Info info = new Info(logWindowInfo, gameWindowInfo);
+    	FrameInfo robotPositionWindowInfo = ((RobotPositionWindow)panes[2]).getInfo(); 
+    	Info info = new Info(logWindowInfo, gameWindowInfo, robotPositionWindowInfo);
     	Gson gson = new GsonBuilder().create();
     	FileWriter outStream;
     	try {

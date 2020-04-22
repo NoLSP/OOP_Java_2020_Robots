@@ -1,60 +1,40 @@
 package gui;
 
-import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.AffineTransform;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.Observable;
+import java.util.Observer;
 
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-public class GameVisualizer extends JPanel
+public class GameVisualizer extends JPanel implements Observer
 {
-    private final Timer m_timer = initTimer();
-    
-    private static Timer initTimer() 
-    {
-        Timer timer = new Timer("events generator", true);
-        return timer;
-    }
-    
-    private Robot robot = new Robot();
-    
-    private Target target = new Target(); 
+	private PaintInfo paintInfo = new PaintInfo(100, 100, 0, 150, 100);
+	private RobotController robotController;
     
     public GameVisualizer() 
     {
-        m_timer.schedule(new TimerTask()
-        {
-            @Override
-            public void run()
-            {
-                onRedrawEvent();
-            }
-        }, 0, 50);
-        m_timer.schedule(new TimerTask()
-        {
-            @Override
-            public void run()
-            {
-                onModelUpdateEvent();
-            }
-        }, 0, 10);
         addMouseListener(new MouseAdapter()
         {
             @Override
             public void mouseClicked(MouseEvent e)
             {
-                target.setPosition(e.getPoint());
-                repaint();
+                if(robotController != null)
+                	robotController.updateController(e.getPoint());
+                //System.out.println(e.getPoint().x + ", " + e.getPoint().y);
             }
         });
         setDoubleBuffered(true);
+        
+    }
+    
+    public void setController(RobotController rController)
+    {
+    	this.robotController = rController;
     }
     
     protected void onRedrawEvent()
@@ -62,17 +42,23 @@ public class GameVisualizer extends JPanel
         EventQueue.invokeLater(this::repaint);
     }
     
-    protected void onModelUpdateEvent()
-    {
-    	robot.move(robot.posX(), robot.posY(), target.posX(), target.posY(), 10);
-    }
-    
     @Override
     public void paint(Graphics g)
     {
         super.paint(g);
         Graphics2D g2d = (Graphics2D)g; 
-        Painter.drawRobot(g2d, robot.posX(), robot.posY(), robot.direction());
-        Painter.drawTarget(g2d, target.posX(), target.posY());
+        Painter.drawRobot(g2d, paintInfo.robotX(), paintInfo.robotY(), paintInfo.robotDirection());
+        Painter.drawTarget(g2d, paintInfo.targetX(), paintInfo.targetY());
     }
+
+	@Override
+	public void update(Observable o, Object arg) {
+		if (o instanceof RobotModel)
+		{
+			//System.out.println((PaintInfo) arg);
+			paintInfo = (PaintInfo) arg;
+			onRedrawEvent();
+		}
+		
+	}
 }

@@ -36,11 +36,11 @@ public class Robot {
             double velocity = maxVelocity;
             double angleToTarget = Calculator.getAngleTo(robotX, robotY, targetX, targetY);
             double angularVelocity = 0;
-            if (angleToTarget > m_Direction)
+            if (angleToTarget > m_Direction+0.01)
             {
                 angularVelocity = maxAngularVelocity;
             }
-            if (angleToTarget < m_Direction)
+            if (angleToTarget < m_Direction-0.01)
             {
                 angularVelocity = -maxAngularVelocity;
             }
@@ -50,25 +50,42 @@ public class Robot {
     
     public void move(double velocity, double angularVelocity, double duration)
     {
-        velocity = Calculator.applyLimits(velocity, 0, maxVelocity);
+    	double newDirection = m_Direction;
+    	double newX = m_PositionX;
+    	double newY = m_PositionY;
+    	
+    	velocity = Calculator.applyLimits(velocity, 0, maxVelocity);
         angularVelocity = Calculator.applyLimits(angularVelocity, -maxAngularVelocity, maxAngularVelocity);
-        double newX = m_PositionX + velocity / angularVelocity * 
-            (Math.sin(m_Direction  + angularVelocity * duration) -
-                Math.sin(m_Direction));
-        if (!Double.isFinite(newX))
-        {
-            newX = m_PositionX + velocity * duration * Math.cos(m_Direction);
-        }
-        double newY = m_PositionY - velocity / angularVelocity * 
-            (Math.cos(m_Direction  + angularVelocity * duration) -
-                Math.cos(m_Direction));
-        if (!Double.isFinite(newY))
-        {
-            newY = m_PositionY + velocity * duration * Math.sin(m_Direction);
-        }
-        m_PositionX = newX;
-        m_PositionY = newY;
-        double newDirection = Calculator.asNormalizedRadians(m_Direction + angularVelocity * duration); 
-        m_Direction = newDirection;
+    	
+    	if(angularVelocity != 0)
+    		newDirection = Calculator.asNormalizedRadians(m_Direction + angularVelocity * duration);
+    	else
+    	{
+    		newX = m_PositionX + velocity * duration * Math.cos(m_Direction);
+    		newY = m_PositionY + velocity * duration * Math.sin(m_Direction);
+    	}
+//        velocity = Calculator.applyLimits(velocity, 0, maxVelocity);
+//        angularVelocity = Calculator.applyLimits(angularVelocity, -maxAngularVelocity, maxAngularVelocity);
+//        double newX = m_PositionX + velocity / angularVelocity * 
+//            (Math.sin(m_Direction  + angularVelocity * duration) -
+//                Math.sin(m_Direction));
+//        if (!Double.isFinite(newX))
+//        {
+//            newX = m_PositionX + velocity * duration * Math.cos(m_Direction);
+//        }
+//        double newY = m_PositionY - velocity / angularVelocity * 
+//            (Math.cos(m_Direction  + angularVelocity * duration) -
+//                Math.cos(m_Direction));
+//        if (!Double.isFinite(newY))
+//        {
+//            newY = m_PositionY + velocity * duration * Math.sin(m_Direction);
+//        }
+//        m_PositionX = newX;
+//        m_PositionY = newY;
+//        double newDirection = Calculator.asNormalizedRadians(m_Direction + angularVelocity * duration); 
+//        m_Direction = newDirection;
+    	m_PositionX = newX;
+        m_PositionY = newY; 
+        m_Direction = Calculator.asNormalizedRadians(newDirection);;
     }
 }
