@@ -29,7 +29,11 @@ public class LoggingStructure implements Iterable<LogEntry>
 		if (tall == null) 
 			tall = head;
 		if(localSize == maxSize)
-			tall = tall.previous();
+		{
+			Node newTall = tall.previous();
+			newTall.setNext(null);
+			tall = newTall;
+		}
 			
 		else
 			localSize++;

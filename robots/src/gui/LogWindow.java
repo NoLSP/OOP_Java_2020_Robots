@@ -45,7 +45,12 @@ public class LogWindow extends JInternalFrame implements LogChangeListener
     @Override
     public void onLogChanged()
     {
-        EventQueue.invokeLater(this::updateLogContent);
+    	Runnable r = ()->{
+            updateLogContent();
+        };
+    	Thread tr = new Thread(r);
+    	tr.start();
+        //EventQueue.invokeLater(this::updateLogContent);
     }
 
 	public FrameInfo getInfo() {
